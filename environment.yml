@@ -1,0 +1,6 @@
+name: footscan
+
+dependencies:
+  - matplotlib
+  - numpy
+  - scipy
