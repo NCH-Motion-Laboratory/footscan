@@ -11,8 +11,8 @@ class Step():
         self.minidx = None
         self.maxidx = None
         
-        self.dti = None
         self.dtis = None
+        dti = None
     
         with open(fname, "r") as f:
             lines = f.readlines()
@@ -36,7 +36,7 @@ class Step():
             
                 if line == '[Data]\n':
                     assert (self.scountx is not None) and (self.scounty is not None)
-                    self.dti = self.__read_frame(lines, i+1, self.scountx, self.scounty)
+                    dti = self.__read_frame(lines, i+1, self.scountx, self.scounty)
                     i += self.scountx
             
                 i += 1
@@ -45,7 +45,7 @@ class Step():
                     (self.scounty is not None) and \
                     (self.minidx is not None) and \
                     (self.maxidx is not None) and \
-                    (self.dti is not None)
+                    (dti is not None)
             
             # Read the dynamic part
             i = 0
@@ -63,6 +63,9 @@ class Step():
                 i += 1
                 
             assert frame_id == self.maxidx+1
+            assert not np.any(self.dtis.max(axis=2) - dti)
+
+            self.dtis[self.dtis==-1] = 0
         
         
     def __read_frame(self, lines, line_num, scountx, scounty):
