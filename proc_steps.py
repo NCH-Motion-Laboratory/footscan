@@ -59,5 +59,5 @@ all = np.concatenate((all_before, all_after), axis=0)
 plt.figure()
 
 for i in range(maxf):
-    plt.matshow(all[:, :, i], fignum=0, aspect=s_before.steps[0].dx / s_before.steps[0].dy, vmin=0, vmax=maxdata)
-    plt.savefig(OUT_FNAME_TEMPL % i, format='png')
+    plt.matshow(all[:, :, i], fignum=0, aspect=s_before.steps[0].dx / s_before.steps[0].dy, vmin=0, vmax=maxdata, cmap='inferno')
+    plt.savefig(OUT_FNAME_TEMPL % i, format='png', dpi=300)
