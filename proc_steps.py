@@ -4,12 +4,16 @@ import matplotlib.pylab as plt
 
 from footscan import Session
 
-FPEF_BEFORE = '/home/andrey/storage/Data/Gait_Lab/footscan_export_test/test_test_-_Session_6_-_12-1-2023_-_CadCam_'
-FPEF_AFTER = '/home/andrey/storage/Data/Gait_Lab/footscan_export_test/test_test_-_Session_6_-_12-1-2023_-_CadCam_'
-NSTEPS = 4
-OUT_FNAME_TEMPL = '/home/andrey/scratch/out/frame_%07i.png'
+FPEF_BEFORE = 'C:\\Users\\HUS86357138\\scratch\\footscan_pain\\MG\kävely\\Mari_Gueye_-_Session_10_-_20-12-2022_-_CadCam_'
+FPEF_AFTER = 'C:\\Users\\HUS86357138\\scratch\\footscan_pain\\MG\kävely\\Mari_Gueye_-_Session_20_-_20-12-2022_-_CadCam_'
+OUT_FNAME_TEMPL = 'C:\\Users\\HUS86357138\\scratch\\footscan_pain\\MG\kävely\\out\\frame_%07i.png'
+OUT_FNAME_MAX = 'C:\\Users\\HUS86357138\\scratch\\footscan_pain\\MG\kävely\\out\\max.png'
+
+NSTEPS = 5
 NPAD_ROW = 10
 NPAD_COL = 10
+CMAP = 'inferno'
+DPI = 300
 
 def zeropad(nr, nc, nf, inp):
     """
@@ -59,5 +63,8 @@ all = np.concatenate((all_before, all_after), axis=0)
 plt.figure()
 
 for i in range(maxf):
-    plt.matshow(all[:, :, i], fignum=0, aspect=s_before.steps[0].dx / s_before.steps[0].dy, vmin=0, vmax=maxdata, cmap='inferno')
-    plt.savefig(OUT_FNAME_TEMPL % i, format='png', dpi=300)
+    plt.matshow(all[:, :, i], fignum=0, aspect=s_before.steps[0].dx / s_before.steps[0].dy, vmin=0, vmax=maxdata, cmap=CMAP)
+    plt.savefig(OUT_FNAME_TEMPL % i, format='png', dpi=DPI)
+
+plt.matshow(all.max(axis=2), fignum=0, aspect=s_before.steps[0].dx / s_before.steps[0].dy, vmin=0, vmax=maxdata, cmap=CMAP)
+plt.savefig(OUT_FNAME_MAX, format='png', dpi=DPI)
