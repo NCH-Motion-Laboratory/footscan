@@ -124,8 +124,6 @@ class Step():
             # Make sure that data_max equals the maximum of self.data over all timeframes
             assert not np.any(self.data.max(axis=2) - data_max)
 
-            self.data[self.data==-1] = 0
-        
         
     def __read_frame(self, lines, line_num, scountx, scounty):
         """ Read a single frame starting at the line line_num
@@ -161,3 +159,21 @@ class Session():
 
             # Make sure that the context in the file name and within the file itself match
             assert str(step_path_matches[0]) == '%s%s%i.apd' % (fname_prefix, self.steps[-1].context, i + 1)
+
+def zeropad(nr, nc, nf, inp):
+    """
+    Pad the input sides so that the new size is nr * nc * nf. For the nr and nc
+    dimensions split the padding approximately evenly before/after, for the nf
+    dimension add all the padding after.
+    """
+    r, c, f = inp.shape
+    dr = nr - r
+    dc = nc - c
+
+    r_before = dr // 2
+    c_before = dc // 2
+
+    r_after = dr - r_before
+    c_after = dc - c_before
+
+    return np.pad(inp, ((r_before, r_after), (c_before, c_after), (0, nf-f)), constant_values=-1)

@@ -2,7 +2,7 @@ import numpy as np
 
 import matplotlib.pylab as plt
 
-from footscan import Session
+from footscan import Session, zeropad
 
 FPEF_BEFORE = 'C:\\Users\\HUS86357138\\scratch\\footscan_pain\\MG\kävely\\Mari_Gueye_-_Session_10_-_20-12-2022_-_CadCam_'
 FPEF_AFTER = 'C:\\Users\\HUS86357138\\scratch\\footscan_pain\\MG\kävely\\Mari_Gueye_-_Session_20_-_20-12-2022_-_CadCam_'
@@ -12,26 +12,8 @@ OUT_FNAME_MAX = 'C:\\Users\\HUS86357138\\scratch\\footscan_pain\\MG\kävely\\out
 NSTEPS = 5
 NPAD_ROW = 10
 NPAD_COL = 10
-CMAP = 'inferno'
+CMAP = 'cividis'
 DPI = 300
-
-def zeropad(nr, nc, nf, inp):
-    """
-    Pad the input sides so that the new size is nr * nc * nf. For the nr and nc
-    dimensions split the padding approximately evenly before/after, for the nf
-    dimension add all the padding after.
-    """
-    r, c, f = inp.shape
-    dr = nr - r
-    dc = nc - c
-
-    r_before = dr // 2
-    c_before = dc // 2
-
-    r_after = dr - r_before
-    c_after = dc - c_before
-
-    return np.pad(inp, ((r_before, r_after), (c_before, c_after), (0, nf-f)))
 
 s_before = Session(FPEF_BEFORE)
 s_after = Session(FPEF_AFTER)
@@ -59,6 +41,7 @@ all_before = np.concatenate(data_before_left_padded + data_before_right_padded, 
 all_after = np.concatenate(data_after_left_padded + data_after_right_padded, axis=1)
 
 all = np.concatenate((all_before, all_after), axis=0)
+all[all==-1] = np.nan
 
 plt.figure()
 

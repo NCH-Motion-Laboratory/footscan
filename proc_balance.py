@@ -1,0 +1,40 @@
+import numpy as np
+
+import matplotlib.pylab as plt
+
+from footscan import Step, zeropad
+
+FNAME_BEFORE = 'C:\\Users\\HUS86357138\\scratch\\footscan_pain\\AA\yhden_jalan_seisominen - vasen\\Anne_Aho_-_Session_8_-_20-12-2022_-_CadCam_L1.apd'
+FNAME_AFTER = 'C:\\Users\\HUS86357138\\scratch\\footscan_pain\\AA\yhden_jalan_seisominen - vasen\\Anne_Aho_-_Session_18_-_20-12-2022_-_CadCam_L1.apd'
+OUT_FNAME_TEMPL = 'C:\\Users\\HUS86357138\\scratch\\footscan_pain\\AA\yhden_jalan_seisominen - vasen\\out\\frame_%07i.png'
+OUT_FNAME_MAX = 'C:\\Users\\HUS86357138\\scratch\\footscan_pain\\AA\yhden_jalan_seisominen - vasen\\out\\max.png'
+
+NPAD_ROW = 10
+NPAD_COL = 10
+CMAP = 'cividis'
+DPI = 300
+
+s_before = Step(FNAME_BEFORE)
+s_after = Step(FNAME_AFTER)
+
+# Find max dimensions, data value
+maxr = max(s_before.data.shape[0], s_after.data.shape[0]) + NPAD_ROW
+maxc = max(s_before.data.shape[1], s_after.data.shape[1]) + NPAD_COL
+maxf = max(s_before.data.shape[2], s_after.data.shape[2])
+maxdata = max(s_before.data.max(), s_after.data.max())
+
+# Pad the data
+data_before = zeropad(maxr, maxc, maxf, s_before.data)
+data_after = zeropad(maxr, maxc, maxf, s_after.data)
+
+all = np.concatenate((data_before, data_after), axis=1)
+all[all==-1] = np.nan
+
+plt.figure()
+
+for i in range(maxf):
+    plt.matshow(np.rot90(all[:, :, i], -1), fignum=0, aspect=s_before.dy / s_before.dx, vmin=0, vmax=maxdata, cmap=CMAP)
+    plt.savefig(OUT_FNAME_TEMPL % i, format='png', dpi=DPI)
+
+plt.matshow(np.rot90(all.max(axis=2), -1), fignum=0, aspect=s_before.dy / s_before.dx, vmin=0, vmax=maxdata, cmap=CMAP)
+plt.savefig(OUT_FNAME_MAX, format='png', dpi=DPI)
