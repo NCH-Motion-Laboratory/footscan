@@ -4,15 +4,24 @@ import matplotlib.pylab as plt
 
 from footscan import Step, zeropad
 
-FNAME_BEFORE = 'C:\\Users\\HUS86357138\\scratch\\footscan_pain\\AA\yhden_jalan_seisominen - vasen\\Anne_Aho_-_Session_8_-_20-12-2022_-_CadCam_L1.apd'
-FNAME_AFTER = 'C:\\Users\\HUS86357138\\scratch\\footscan_pain\\AA\yhden_jalan_seisominen - vasen\\Anne_Aho_-_Session_18_-_20-12-2022_-_CadCam_L1.apd'
-OUT_FNAME_TEMPL = 'C:\\Users\\HUS86357138\\scratch\\footscan_pain\\AA\yhden_jalan_seisominen - vasen\\out\\frame_%07i.png'
-OUT_FNAME_MAX = 'C:\\Users\\HUS86357138\\scratch\\footscan_pain\\AA\yhden_jalan_seisominen - vasen\\out\\max.png'
+"""
+FNAME_BEFORE = 'C:\\Users\\HUS86357138\\scratch\\footscan_pain\\AA\\yhden_jalan_seisominen - vasen\\Anne_Aho_-_Session_8_-_20-12-2022_-_CadCam_L1.apd'
+FNAME_AFTER = 'C:\\Users\\HUS86357138\\scratch\\footscan_pain\\AA\\yhden_jalan_seisominen - vasen\\Anne_Aho_-_Session_18_-_20-12-2022_-_CadCam_L1'
+OUT_FNAME_TEMPL = 'C:\\Users\\HUS86357138\\scratch\\footscan_pain\\AA\\yhden_jalan_seisominen - vasen\\out\\frame_%07i.png'
+OUT_FNAME_MAX = 'C:\\Users\\HUS86357138\\scratch\\footscan_pain\\AA\\yhden_jalan_seisominen - vasen\\out\\max.png'
+"""
+
+FNAME_BEFORE = 'C:\\Users\\HUS86357138\\scratch\\footscan_pain\\AA\\yhden_jalan_päkiälle_nosto - vasen\\Anne_Aho_-_Session_10_-_20-12-2022_-_CadCam_L1.apd'
+FNAME_AFTER = 'C:\\Users\\HUS86357138\\scratch\\footscan_pain\\AA\\yhden_jalan_päkiälle_nosto - vasen\\Anne_Aho_-_Session_20_-_20-12-2022_-_CadCam_R1.apd'
+OUT_FNAME_TEMPL = 'C:\\Users\\HUS86357138\\scratch\\footscan_pain\\AA\\yhden_jalan_päkiälle_nosto - vasen\\out\\frame_%07i.png'
+OUT_FNAME_MAX = 'C:\\Users\\HUS86357138\\scratch\\footscan_pain\\AA\\yhden_jalan_päkiälle_nosto - vasen\\out\\max.png'
 
 NPAD_ROW = 10
 NPAD_COL = 10
 CMAP = 'Wistia'
 DPI = 300
+ROT = 1
+# ROT = -1
 
 s_before = Step(FNAME_BEFORE)
 s_after = Step(FNAME_AFTER)
@@ -28,7 +37,7 @@ data_before = zeropad(maxr, maxc, maxf, s_before.data)
 data_after = zeropad(maxr, maxc, maxf, s_after.data)
 
 all = np.concatenate((data_before, data_after), axis=1)
-all = np.rot90(all, -1)
+all = np.rot90(all, ROT)
 
 all_max = all.max(axis=2)
 backgr = all_max.copy()
