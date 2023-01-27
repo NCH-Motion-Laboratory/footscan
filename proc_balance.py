@@ -11,7 +11,7 @@ OUT_FNAME_MAX = 'C:\\Users\\HUS86357138\\scratch\\footscan_pain\\AA\yhden_jalan_
 
 NPAD_ROW = 10
 NPAD_COL = 10
-CMAP = 'cividis'
+CMAP = 'Wistia'
 DPI = 300
 
 s_before = Step(FNAME_BEFORE)
@@ -28,14 +28,22 @@ data_before = zeropad(maxr, maxc, maxf, s_before.data)
 data_after = zeropad(maxr, maxc, maxf, s_after.data)
 
 all = np.concatenate((data_before, data_after), axis=1)
+all = np.rot90(all, -1)
+
+all_max = all.max(axis=2)
+backgr = all_max.copy()
+all_max[all_max==-1] = np.nan
+backgr[backgr>-1] = 0
 all[all==-1] = np.nan
 
 plt.figure()
 
 for i in range(maxf):
     plt.clf()
-    plt.matshow(np.rot90(all[:, :, i], -1), fignum=0, aspect=s_before.dy / s_before.dx, vmin=0, vmax=maxdata, cmap=CMAP)
+    plt.matshow(backgr, vmin=-1, vmax=6, cmap='binary')
+    plt.matshow(all[:, :, i], fignum=0, aspect=s_before.dy / s_before.dx, vmin=0, vmax=maxdata, cmap=CMAP)
     plt.savefig(OUT_FNAME_TEMPL % i, format='png', dpi=DPI)
 
-plt.matshow(np.rot90(all.max(axis=2), -1), fignum=0, aspect=s_before.dy / s_before.dx, vmin=0, vmax=maxdata, cmap=CMAP)
+plt.clf()
+plt.matshow(all_max, fignum=0, aspect=s_before.dy / s_before.dx, vmin=0, vmax=maxdata, cmap=CMAP)
 plt.savefig(OUT_FNAME_MAX, format='png', dpi=DPI)

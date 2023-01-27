@@ -4,15 +4,15 @@ import matplotlib.pylab as plt
 
 from footscan import Session, zeropad
 
-FPEF_BEFORE = 'C:\\Users\\HUS86357138\\scratch\\footscan_pain\\MG\kävely\\Mari_Gueye_-_Session_10_-_20-12-2022_-_CadCam_'
-FPEF_AFTER = 'C:\\Users\\HUS86357138\\scratch\\footscan_pain\\MG\kävely\\Mari_Gueye_-_Session_20_-_20-12-2022_-_CadCam_'
-OUT_FNAME_TEMPL = 'C:\\Users\\HUS86357138\\scratch\\footscan_pain\\MG\kävely\\out\\frame_%07i.png'
-OUT_FNAME_MAX = 'C:\\Users\\HUS86357138\\scratch\\footscan_pain\\MG\kävely\\out\\max.png'
+FPEF_BEFORE = 'C:\\Users\\HUS86357138\\scratch\\footscan_pain\\AA\\kävely\\Anne_Aho_-_Session_11_-_20-12-2022_-_CadCam_'
+FPEF_AFTER = 'C:\\Users\\HUS86357138\\scratch\\footscan_pain\\AA\\kävely\\Anne_Aho_-_Session_21_-_20-12-2022_-_CadCam_'
+OUT_FNAME_TEMPL = 'C:\\Users\\HUS86357138\\scratch\\footscan_pain\\AA\kävely\\out\\frame_%07i.png'
+OUT_FNAME_MAX = 'C:\\Users\\HUS86357138\\scratch\\footscan_pain\\AA\\kävely\\out\\max.png'
 
-NSTEPS = 5
+NSTEPS = 6
 NPAD_ROW = 10
 NPAD_COL = 10
-CMAP = 'cividis'
+CMAP = 'Wistia'
 DPI = 300
 
 s_before = Session(FPEF_BEFORE)
@@ -41,14 +41,20 @@ all_before = np.concatenate(data_before_left_padded + data_before_right_padded, 
 all_after = np.concatenate(data_after_left_padded + data_after_right_padded, axis=1)
 
 all = np.concatenate((all_before, all_after), axis=0)
+all_max = all.max(axis=2)
+backgr = all_max.copy()
+all_max[all_max==-1] = np.nan
+backgr[backgr>-1] = 0
 all[all==-1] = np.nan
 
 plt.figure()
 
 for i in range(maxf):
     plt.clf()
+    plt.matshow(backgr, vmin=-1, vmax=6, cmap='binary')
     plt.matshow(all[:, :, i], fignum=0, aspect=s_before.steps[0].dx / s_before.steps[0].dy, vmin=0, vmax=maxdata, cmap=CMAP)
     plt.savefig(OUT_FNAME_TEMPL % i, format='png', dpi=DPI)
 
-plt.matshow(all.max(axis=2), fignum=0, aspect=s_before.steps[0].dx / s_before.steps[0].dy, vmin=0, vmax=maxdata, cmap=CMAP)
+plt.clf()
+plt.matshow(all_max, fignum=0, aspect=s_before.steps[0].dx / s_before.steps[0].dy, vmin=0, vmax=maxdata, cmap=CMAP)
 plt.savefig(OUT_FNAME_MAX, format='png', dpi=DPI)
