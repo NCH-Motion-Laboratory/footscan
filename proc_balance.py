@@ -33,6 +33,7 @@ all[all==-1] = np.nan
 plt.figure()
 
 for i in range(maxf):
+    plt.clf()
     plt.matshow(np.rot90(all[:, :, i], -1), fignum=0, aspect=s_before.dy / s_before.dx, vmin=0, vmax=maxdata, cmap=CMAP)
     plt.savefig(OUT_FNAME_TEMPL % i, format='png', dpi=DPI)
 

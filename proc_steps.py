@@ -46,6 +46,7 @@ all[all==-1] = np.nan
 plt.figure()
 
 for i in range(maxf):
+    plt.clf()
     plt.matshow(all[:, :, i], fignum=0, aspect=s_before.steps[0].dx / s_before.steps[0].dy, vmin=0, vmax=maxdata, cmap=CMAP)
     plt.savefig(OUT_FNAME_TEMPL % i, format='png', dpi=DPI)
 
