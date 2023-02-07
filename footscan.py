@@ -6,10 +6,13 @@ import numpy as np
 
 class Step():
     def __init__(self, fname):
-        self.scountx = None
-        self.scounty = None
-        self.minidx = None
-        self.maxidx = None
+        """
+        Note that footscan's xy axis differ from the matplotlib's convention
+        (footscan's x is matplotlib's y and vice versa), so we swap these
+        when reading from file.
+        """
+        self.sizex = None
+        self.sizey = None
         self.dx = None
         self.dy = None
         self.dt = None
@@ -18,8 +21,18 @@ class Step():
         self.unit_time = None
 
         self.context = None     # Should be either 'R' or 'L'
-        
         self.data = None
+
+        # Used for plotting, compatible with matshow()
+        self.origin = 'upper'
+        self.extent = None
+
+        # center of pressure coords
+        self.cop_x = None
+        self.cop_y = None
+
+        minidx = None
+        maxidx = None
         data_max = None
     
         with open(fname, "r") as f:
@@ -34,25 +47,25 @@ class Step():
                 # Read the data dimensions in x, y and t
                 #
                 if line.startswith('SensCountX'):
-                    self.scountx = int(line.split('=')[1])
+                    self.sizey = int(line.split('=')[1])
             
                 if line.startswith('SensCountY'):
-                    self.scounty = int(line.split('=')[1])
+                    self.sizex = int(line.split('=')[1])
             
                 if line.startswith('MinIdx'):
-                    self.minidx = int(line.split('=')[1])
+                    minidx = int(line.split('=')[1])
             
                 if line.startswith('MaxIdx'):
-                    self.maxidx = int(line.split('=')[1])
+                    maxidx = int(line.split('=')[1])
 
                 ##---------------------------------------------------------
                 # Read the data resolution in x, y and t
                 #
                 if line.startswith('LDistX'):
-                    self.dx = float(line.split('=')[1])
+                    self.dy = float(line.split('=')[1])
 
                 if line.startswith('LDistY'):
-                    self.dy = float(line.split('=')[1])
+                    self.dx = float(line.split('=')[1])
 
                 if line.startswith('TimeDiff'):
                     self.dt = float(line.split('=')[1])
@@ -83,16 +96,16 @@ class Step():
                 # Read the pressure data maximum
                 #
                 if line == '[Data]\n':
-                    assert (self.scountx is not None) and (self.scounty is not None)
-                    data_max = self.__read_frame(lines, i+1, self.scountx, self.scounty)
-                    i += self.scountx
+                    assert (self.sizey is not None) and (self.sizex is not None)
+                    data_max = self.__read_frame(lines, i+1, self.sizey, self.sizex)
+                    i += self.sizey
             
                 i += 1
         
-            assert (self.scountx is not None) and \
-                   (self.scounty is not None) and \
-                   (self.minidx is not None) and \
-                   (self.maxidx is not None)
+            assert (self.sizex is not None) and \
+                   (self.sizey is not None) and \
+                   (minidx is not None) and \
+                   (maxidx is not None)
 
             assert (self.dx is not None) and \
                    (self.dy is not None) and \
@@ -107,24 +120,38 @@ class Step():
             
             # Read the dynamic part
             i = 0
-            self.data = np.zeros((self.scountx, self.scounty, self.maxidx-self.minidx+1))
-            frame_id = self.minidx
+            self.data = np.zeros((self.sizey, self.sizex, maxidx-minidx+1))
+            frame_id = minidx
             
             while i < len(lines):
                 line = lines[i]
                 
                 if line == ('[Data%i]\n' % frame_id):
-                    self.data[:,:,frame_id-self.minidx] = self.__read_frame(lines, i+1, self.scountx, self.scounty)
-                    i += self.scountx
+                    self.data[:,:,frame_id-minidx] = self.__read_frame(lines, i+1, self.sizey, self.sizex)
+                    i += self.sizey
                     frame_id += 1
                     
                 i += 1
                 
-            assert frame_id == self.maxidx+1
+            assert frame_id == maxidx+1
             # Make sure that data_max equals the maximum of self.data over all timeframes
             assert not np.any(self.data.max(axis=2) - data_max)
 
-        
+            self.extent = (-self.dx*0.5, self.dx*(self.sizex-0.5), self.dy*(self.sizey-0.5), -self.dy*0.5)
+
+            # Compute the center-of-pressure trajectory
+            z_data = self.data.copy()
+            z_data[z_data==-1] = 0
+
+            mx, my = np.meshgrid(self.dx * np.arange(self.sizex), self.dy * np.arange(self.sizey))
+            # extend mx, my to 3D
+            mx = np.repeat(mx[:, :, np.newaxis], z_data.shape[2], axis=2)
+            my = np.repeat(my[:, :, np.newaxis], z_data.shape[2], axis=2)
+
+            self.cop_x = np.sum(z_data * mx, axis=(0, 1)) / np.sum(z_data, axis=(0, 1))
+            self.cop_y = np.sum(z_data * my, axis=(0, 1)) / np.sum(z_data, axis=(0, 1))
+
+
     def __read_frame(self, lines, line_num, scountx, scounty):
         """ Read a single frame starting at the line line_num
         """
@@ -159,21 +186,3 @@ class Session():
 
             # Make sure that the context in the file name and within the file itself match
             assert str(step_path_matches[0]) == '%s%s%i.apd' % (fname_prefix, self.steps[-1].context, i + 1)
-
-def zeropad(nr, nc, nf, inp):
-    """
-    Pad the input sides so that the new size is nr * nc * nf. For the nr and nc
-    dimensions split the padding approximately evenly before/after, for the nf
-    dimension add all the padding after.
-    """
-    r, c, f = inp.shape
-    dr = nr - r
-    dc = nc - c
-
-    r_before = dr // 2
-    c_before = dc // 2
-
-    r_after = dr - r_before
-    c_after = dc - c_before
-
-    return np.pad(inp, ((r_before, r_after), (c_before, c_after), (0, nf-f)), constant_values=-1)
