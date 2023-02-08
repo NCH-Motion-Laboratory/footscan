@@ -7,7 +7,10 @@ from footscan import Session
 FPEF_BEFORE = '/home/andrey/scratch/footscan_pain/AA/kävely/Anne_Aho_-_Session_11_-_20-12-2022_-_CadCam_'
 FPEF_AFTER = '/home/andrey/scratch/footscan_pain/AA/kävely/Anne_Aho_-_Session_21_-_20-12-2022_-_CadCam_'
 OUT_FNAME_TEMPL = '/home/andrey/scratch/footscan_pain/AA/kävely/out/frame_%07i.png'
-OUT_FNAME_MAX = '/home/andrey/scratch/footscan_pain/AA/kävely/out/max.png'
+
+#FPEF_BEFORE = '/home/andrey/scratch/footscan_pain/MG/kävely/Mari_Gueye_-_Session_10_-_20-12-2022_-_CadCam_'
+#FPEF_AFTER = '/home/andrey/scratch/footscan_pain/MG/kävely/Mari_Gueye_-_Session_20_-_20-12-2022_-_CadCam_'
+#OUT_FNAME_TEMPL = '/home/andrey/scratch/footscan_pain/MG/kävely/out/frame_%07i.png'
 
 MAX_NSTEPS = 20
 X_MARG = 0.1    # relative to the footprint size

@@ -137,7 +137,7 @@ class Step():
             # Make sure that data_max equals the maximum of self.data over all timeframes
             assert not np.any(self.data.max(axis=2) - data_max)
 
-            self.extent = (-self.dx*0.5, self.dx*(self.sizex-0.5), self.dy*(self.sizey-0.5), -self.dy*0.5)
+            self.extent = [-self.dx*0.5, self.dx*(self.sizex-0.5), self.dy*(self.sizey-0.5), -self.dy*0.5]
 
             # Compute the center-of-pressure trajectory
             z_data = self.data.copy()
@@ -150,6 +150,16 @@ class Step():
 
             self.cop_x = np.sum(z_data * mx, axis=(0, 1)) / np.sum(z_data, axis=(0, 1))
             self.cop_y = np.sum(z_data * my, axis=(0, 1)) / np.sum(z_data, axis=(0, 1))
+
+            # Center the footprint on the first frame's COP
+            start_cop_x = self.cop_x[0]
+            start_cop_y = self.cop_y[0]
+            self.cop_x -= start_cop_x
+            self.cop_y -= start_cop_y
+            self.extent[0] -= start_cop_x
+            self.extent[1] -= start_cop_x
+            self.extent[2] -= start_cop_y
+            self.extent[3] -= start_cop_y
 
 
     def __read_frame(self, lines, line_num, scountx, scounty):
